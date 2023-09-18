@@ -14,7 +14,7 @@ function muestraPuntuacion(puntuacion: number) {
 function dameCarta() {
   let newCard: number = Math.floor(Math.random() * 10) + 1;
   if (newCard > 7) newCard = newCard + 2;
-  pideCarta(newCard);
+  return newCard;
 }
 
 const buttonAsk = document.getElementById("askCard");
@@ -28,7 +28,7 @@ const message = document.getElementById("message");
 const startAgain = document.getElementById("startAgain");
 
 if (buttonAsk !== null && buttonAsk !== undefined) {
-  buttonAsk.addEventListener("click", () => dameCarta());
+  buttonAsk.addEventListener("click", () => pideCarta(true));
 }
 
 if (noMoreCards !== null && noMoreCards !== undefined) {
@@ -42,35 +42,142 @@ if (startAgain !== null && startAgain !== undefined) {
 
 const empezarNuevo = (): void => {
   score = 0;
-  pideCarta(score);
+  pintarCarta(score);
   showMessage("");
-  if (buttonAsk !== null && buttonAsk !== undefined) {
-    buttonAsk.hidden = false;
-  }
-  if (noMoreCards !== null && noMoreCards !== undefined) {
-    noMoreCards.hidden = false;
-  }
-  if (startAgain !== null && startAgain !== undefined) {
-    startAgain.hidden = true;
-  }
+  muestraPuntuacion(score);
+  botonesJugar();
 };
 
 const plantarse = (): void => {
+  showMessage(seleccionMensaje());
+  botonReset();
+  botonWhatHappen();
+};
+
+const whatWouldHappen = document.getElementById("whatWouldHappen");
+
+if (whatWouldHappen !== null && whatWouldHappen !== undefined) {
+  whatWouldHappen.hidden = true;
+  whatWouldHappen.addEventListener("click", () => pideCarta(false));
+}
+
+const pideCarta = (jugando: boolean): void => {
+  const carta: number = dameCarta();
+  pintarCarta(carta);
+  score = score + obtenerValorCarta(carta);
+  muestraPuntuacion(score);
+  revisarPartida(jugando);
+};
+
+const revisarPartida = (jugando: boolean): void => {
+  if (score > 7.5 && jugando) {
+    showMessage(seleccionMensaje());
+    botonReset();
+  }
+  if (!jugando) {
+    showMessage("Esta puntuación habrias sacado si hubieras seguido jugando");
+  }
+};
+
+function pintarCarta(carta: number): void {
+  if (
+    newCardShown !== null &&
+    newCardShown !== undefined &&
+    newCardShown instanceof HTMLImageElement
+  ) {
+    newCardShown.src = mostrarCarta(carta);
+  }
+}
+
+function botonWhatHappen(): void {
+  if (
+    whatWouldHappen !== null &&
+    whatWouldHappen !== undefined &&
+    whatWouldHappen instanceof HTMLButtonElement
+  ) {
+    whatWouldHappen.hidden = false;
+  }
+}
+
+function botonesJugar(): void {
+  if (
+    buttonAsk !== null &&
+    buttonAsk !== undefined &&
+    buttonAsk instanceof HTMLButtonElement
+  ) {
+    buttonAsk.hidden = false;
+  }
+  if (
+    noMoreCards !== null &&
+    noMoreCards !== undefined &&
+    noMoreCards instanceof HTMLButtonElement
+  ) {
+    noMoreCards.hidden = false;
+  }
+  if (
+    startAgain !== null &&
+    startAgain !== undefined &&
+    startAgain instanceof HTMLButtonElement
+  ) {
+    startAgain.hidden = true;
+  }
+  if (
+    whatWouldHappen !== null &&
+    whatWouldHappen !== undefined &&
+    whatWouldHappen instanceof HTMLButtonElement
+  ) {
+    whatWouldHappen.hidden = true;
+  }
+}
+
+function botonReset(): void {
+  if (
+    buttonAsk !== null &&
+    buttonAsk !== undefined &&
+    buttonAsk instanceof HTMLButtonElement
+  ) {
+    buttonAsk.hidden = true;
+  }
+  if (
+    noMoreCards !== null &&
+    noMoreCards !== undefined &&
+    noMoreCards instanceof HTMLButtonElement
+  ) {
+    noMoreCards.hidden = true;
+  }
+  if (
+    startAgain !== null &&
+    startAgain !== undefined &&
+    startAgain instanceof HTMLButtonElement
+  ) {
+    startAgain.hidden = false;
+  }
+}
+
+function showMessage(mensaje: string): void {
+  if (message !== null && message !== undefined) {
+    message.innerHTML = mensaje;
+  }
+}
+
+function seleccionMensaje(): string {
   let mensaje = "";
   if (score <= 4) {
     mensaje = "Has sido muy conservador";
   } else if (score === 5) {
     mensaje = "Te ha entrado el canguelo eh?";
-  } else if (score > 5) {
+  } else if (score > 5 && score <= 7) {
     mensaje = "Casi casi...";
   } else if (score === 7.5) {
     mensaje = "¡Lo has clavado! ¡Enhorabuena!";
+  } else {
+    mensaje = "Game Over";
   }
-  showMessage(mensaje);
-};
+  return mensaje;
+}
 
-const pideCarta = (carta: number): void => {
-  let puntuacion = 0;
+function obtenerValorCarta(carta: number): number {
+  let puntuacion: number;
   if (carta === 1) {
     puntuacion = 1;
   } else if (carta === 10 || carta === 11 || carta === 12) {
@@ -78,36 +185,10 @@ const pideCarta = (carta: number): void => {
   } else {
     puntuacion = carta;
   }
-  if (
-    newCardShown !== null &&
-    newCardShown !== undefined &&
-    newCardShown instanceof HTMLImageElement
-  ) {
-    newCardShown.src = mostrarCarta(carta);
-    score = score + puntuacion;
-    muestraPuntuacion(score);
-    if (score > 7.5) {
-      showMessage("Game Over");
-    }
-  }
-};
-
-function showMessage(mensaje: string) {
-  if (message !== null && message !== undefined) {
-    message.innerHTML = mensaje;
-    if (buttonAsk !== null && buttonAsk !== undefined) {
-      buttonAsk.hidden = true;
-    }
-    if (noMoreCards !== null && noMoreCards !== undefined) {
-      noMoreCards.hidden = true;
-    }
-    if (startAgain !== null && startAgain !== undefined) {
-      startAgain.hidden = false;
-    }
-  }
+  return puntuacion;
 }
 
-function mostrarCarta(carta: number) {
+function mostrarCarta(carta: number): string {
   let card: string;
   switch (carta) {
     case 1: {
