@@ -1,83 +1,131 @@
 import "./style.css";
 
-let score: number = 0;
+let score: number;
 
-muestraPuntuacion(score);
-
-function muestraPuntuacion(puntuacion: number) {
-  const score = document.getElementById("score");
-  if (score !== null && score !== undefined) {
-    score.innerHTML = puntuacion.toString();
-  }
+function initEvents() {
+  score = 0;
+  pintarCarta(0);
+  showMessage("");
+  muestraPuntuacion(0);
+  botonesJugar();
 }
 
-function dameCarta() {
-  let newCard: number = Math.floor(Math.random() * 10) + 1;
-  if (newCard > 7) newCard = newCard + 2;
-  return newCard;
-}
+document.addEventListener("DOMContentLoaded", () => {
+  initEvents();
+});
 
 const buttonAsk = document.getElementById("askCard");
+if (
+  buttonAsk !== null &&
+  buttonAsk !== undefined &&
+  buttonAsk instanceof HTMLButtonElement
+) {
+  buttonAsk.addEventListener("click", () => pideCarta());
+} else {
+  console.error("El elemento con id askCard no es un elemento button");
+}
 
 const noMoreCards = document.getElementById("noMoreCards");
+if (
+  noMoreCards !== null &&
+  noMoreCards !== undefined &&
+  buttonAsk instanceof HTMLButtonElement
+) {
+  noMoreCards.addEventListener("click", () => plantarse());
+} else {
+  console.error("El elemento con id noMoreCards no es un elemento button");
+}
 
 const newCardShown = document.getElementById("card");
 
 const message = document.getElementById("message");
 
 const startAgain = document.getElementById("startAgain");
-
-if (buttonAsk !== null && buttonAsk !== undefined) {
-  buttonAsk.addEventListener("click", () => pideCarta(true));
-}
-
-if (noMoreCards !== null && noMoreCards !== undefined) {
-  noMoreCards.addEventListener("click", () => plantarse());
-}
-
-if (startAgain !== null && startAgain !== undefined) {
+if (
+  startAgain !== null &&
+  startAgain !== undefined &&
+  buttonAsk instanceof HTMLButtonElement
+) {
   startAgain.hidden = true;
   startAgain.addEventListener("click", () => empezarNuevo());
+} else {
+  console.error("El elemento con id startAgain no es un elemento button");
+}
+
+function muestraPuntuacion(puntuacion: number) {
+  const score = document.getElementById("score");
+  if (
+    score !== null &&
+    score !== undefined &&
+    score instanceof HTMLHeadingElement
+  ) {
+    score.innerHTML = puntuacion.toString();
+  } else {
+    console.error("El elemento con id score no es un elemento h1");
+  }
+}
+
+function dameCarta() {
+  let newCard: number = obtenerValorAleatorio();
+  pintarCarta(newCard);
+  const valorRealCarta: number = obtenerValorCarta(newCard);
+  return valorRealCarta;
+}
+
+function obtenerValorAleatorio() {
+  const valorAleatorio: number = Math.floor(Math.random() * 10) + 1;
+  return valorAleatorio > 7 ? valorAleatorio + 2 : valorAleatorio;
 }
 
 const empezarNuevo = (): void => {
-  score = 0;
-  pintarCarta(score);
-  showMessage("");
-  muestraPuntuacion(score);
-  botonesJugar();
+  initEvents();
 };
 
 const plantarse = (): void => {
-  showMessage(seleccionMensaje());
-  botonReset();
-  botonWhatHappen();
+  finalPartidas();
+  buttonWhatWouldHappen(false);
 };
 
 const whatWouldHappen = document.getElementById("whatWouldHappen");
-
 if (whatWouldHappen !== null && whatWouldHappen !== undefined) {
   whatWouldHappen.hidden = true;
-  whatWouldHappen.addEventListener("click", () => pideCarta(false));
+  whatWouldHappen.addEventListener("click", () => queHubieraPasado());
+} else {
+  console.error("El elemento con id whatWouldHappen no es un elemento button");
 }
 
-const pideCarta = (jugando: boolean): void => {
-  const carta: number = dameCarta();
-  pintarCarta(carta);
-  score = score + obtenerValorCarta(carta);
-  muestraPuntuacion(score);
-  revisarPartida(jugando);
+const pideCarta = (): void => {
+  calcularCartaYPuntuacion();
+  revisarPartida();
 };
 
-const revisarPartida = (jugando: boolean): void => {
-  if (score > 7.5 && jugando) {
-    showMessage(seleccionMensaje());
-    botonReset();
-  }
-  if (!jugando) {
-    showMessage("Esta puntuación habrias sacado si hubieras seguido jugando");
+const queHubieraPasado = (): void => {
+  calcularCartaYPuntuacion();
+  showMessage("Esta puntuación habrias sacado si hubieras seguido jugando");
+  botonReset();
+};
+
+function calcularCartaYPuntuacion() {
+  const carta: number = dameCarta();
+  sumarPuntuacion(carta);
+  muestraPuntuacion(score);
+}
+
+function sumarPuntuacion(carta: number): void {
+  score = score + carta;
+}
+
+const revisarPartida = (): void => {
+  if (score > 7.5 || score === 7.5) {
+    finalPartidas();
   }
 };
+
+function finalPartidas() {
+  const mensajeAMostrar: string = seleccionMensaje();
+  showMessage(mensajeAMostrar);
+  botonReset();
+}
 
 function pintarCarta(carta: number): void {
   if (
@@ -86,77 +134,33 @@ function pintarCarta(carta: number): void {
     newCardShown instanceof HTMLImageElement
   ) {
     newCardShown.src = mostrarCarta(carta);
-  }
-}
-
-function botonWhatHappen(): void {
-  if (
-    whatWouldHappen !== null &&
-    whatWouldHappen !== undefined &&
-    whatWouldHappen instanceof HTMLButtonElement
-  ) {
-    whatWouldHappen.hidden = false;
+  } else {
+    console.error("El elemento con id newCardShown no es un elemento image");
   }
 }
 
 function botonesJugar(): void {
-  if (
-    buttonAsk !== null &&
-    buttonAsk !== undefined &&
-    buttonAsk instanceof HTMLButtonElement
-  ) {
-    buttonAsk.hidden = false;
-  }
-  if (
-    noMoreCards !== null &&
-    noMoreCards !== undefined &&
-    noMoreCards instanceof HTMLButtonElement
-  ) {
-    noMoreCards.hidden = false;
-  }
-  if (
-    startAgain !== null &&
-    startAgain !== undefined &&
-    startAgain instanceof HTMLButtonElement
-  ) {
-    startAgain.hidden = true;
-  }
-  if (
-    whatWouldHappen !== null &&
-    whatWouldHappen !== undefined &&
-    whatWouldHappen instanceof HTMLButtonElement
-  ) {
-    whatWouldHappen.hidden = true;
-  }
+  buttonAskShow(false);
+  buttonNoMoreCards(false);
+  buttonStartAgain(true);
+  buttonWhatWouldHappen(true);
 }
 
 function botonReset(): void {
-  if (
-    buttonAsk !== null &&
-    buttonAsk !== undefined &&
-    buttonAsk instanceof HTMLButtonElement
-  ) {
-    buttonAsk.hidden = true;
-  }
-  if (
-    noMoreCards !== null &&
-    noMoreCards !== undefined &&
-    noMoreCards instanceof HTMLButtonElement
-  ) {
-    noMoreCards.hidden = true;
-  }
-  if (
-    startAgain !== null &&
-    startAgain !== undefined &&
-    startAgain instanceof HTMLButtonElement
-  ) {
-    startAgain.hidden = false;
-  }
+  buttonAskShow(true);
+  buttonNoMoreCards(true);
+  buttonStartAgain(false);
 }
 
 function showMessage(mensaje: string): void {
-  if (message !== null && message !== undefined) {
+  if (
+    message !== null &&
+    message !== undefined &&
+    message instanceof HTMLElement
+  ) {
     message.innerHTML = mensaje;
+  } else {
+    console.error("El elemento con id message no es un elemento HTML");
   }
 }
 
@@ -176,16 +180,58 @@ function seleccionMensaje(): string {
   return mensaje;
 }
 
-function obtenerValorCarta(carta: number): number {
-  let puntuacion: number;
-  if (carta === 1) {
-    puntuacion = 1;
-  } else if (carta === 10 || carta === 11 || carta === 12) {
-    puntuacion = 0.5;
+function buttonStartAgain(mostrar: boolean) {
+  if (
+    startAgain !== null &&
+    startAgain !== undefined &&
+    startAgain instanceof HTMLButtonElement
+  ) {
+    startAgain.hidden = mostrar;
   } else {
-    puntuacion = carta;
+    console.error("El elemento con id startAgain no es un elemento button");
   }
-  return puntuacion;
+}
+
+function buttonNoMoreCards(mostrar: boolean) {
+  if (
+    noMoreCards !== null &&
+    noMoreCards !== undefined &&
+    noMoreCards instanceof HTMLButtonElement
+  ) {
+    noMoreCards.hidden = mostrar;
+  } else {
+    console.error("El elemento con id noMoreCards no es un elemento button");
+  }
+}
+
+function buttonAskShow(mostrar: boolean) {
+  if (
+    buttonAsk !== null &&
+    buttonAsk !== undefined &&
+    buttonAsk instanceof HTMLButtonElement
+  ) {
+    buttonAsk.hidden = mostrar;
+  } else {
+    console.error("El elemento con id buttonAsk no es un elemento button");
+  }
+}
+
+function buttonWhatWouldHappen(mostrar: boolean) {
+  if (
+    whatWouldHappen !== null &&
+    whatWouldHappen !== undefined &&
+    whatWouldHappen instanceof HTMLButtonElement
+  ) {
+    whatWouldHappen.hidden = mostrar;
+  } else {
+    console.error(
+      "El elemento con id whatWouldHappen no es un elemento button"
+    );
+  }
+}
+
+function obtenerValorCarta(carta: number): number {
+  return carta <= 7 ? carta : 0.5;
 }
 
 function mostrarCarta(carta: number): string {
