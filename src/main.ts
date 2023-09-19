@@ -87,7 +87,11 @@ const plantarse = (): void => {
 };
 
 const whatWouldHappen = document.getElementById("whatWouldHappen");
-if (whatWouldHappen !== null && whatWouldHappen !== undefined) {
+if (
+  whatWouldHappen !== null &&
+  whatWouldHappen !== undefined &&
+  whatWouldHappen instanceof HTMLButtonElement
+) {
   whatWouldHappen.hidden = true;
   whatWouldHappen.addEventListener("click", () => queHubieraPasado());
 } else {
