@@ -6,7 +6,7 @@ function initEvents() {
   score = 0;
   pintarCarta(0);
   showMessage("");
-  muestraPuntuacion(0);
+  muestraPuntuacion();
   botonesJugar();
 }
 
@@ -38,8 +38,6 @@ if (
 
 const newCardShown = document.getElementById("card");
 
-const message = document.getElementById("message");
-
 const startAgain = document.getElementById("startAgain");
 if (
   startAgain !== null &&
@@ -52,29 +50,22 @@ if (
   console.error("El elemento con id startAgain no es un elemento button");
 }
 
-function muestraPuntuacion(puntuacion: number) {
-  const score = document.getElementById("score");
+function muestraPuntuacion() {
+  const scoreHtml = document.getElementById("score");
   if (
-    score !== null &&
-    score !== undefined &&
-    score instanceof HTMLHeadingElement
+    scoreHtml !== null &&
+    scoreHtml !== undefined &&
+    scoreHtml instanceof HTMLHeadingElement
   ) {
-    score.innerHTML = puntuacion.toString();
+    scoreHtml.innerHTML = score.toString();
   } else {
     console.error("El elemento con id score no es un elemento h1");
   }
 }
 
-function dameCarta() {
-  let newCard: number = obtenerValorAleatorio();
-  pintarCarta(newCard);
-  const valorRealCarta: number = obtenerValorCarta(newCard);
-  return valorRealCarta;
-}
-
 function obtenerValorAleatorio() {
   const valorAleatorio: number = Math.floor(Math.random() * 10) + 1;
-  return valorAleatorio > 7 ? valorAleatorio + 2 : valorAleatorio;
+  return valorAleatorio;
 }
 
 const empezarNuevo = (): void => {
@@ -82,7 +73,7 @@ const empezarNuevo = (): void => {
 };
 
 const plantarse = (): void => {
-  finalPartidas();
+  perderPartida();
   buttonWhatWouldHappen(false);
 };
 
@@ -99,20 +90,29 @@ if (
 }
 
 const pideCarta = (): void => {
-  calcularCartaYPuntuacion();
+  const valorAleatorio: number = obtenerValorAleatorio();
+  const valorRealCarta: number = calcularCarta(valorAleatorio);
+  pintarCarta(valorRealCarta);
+  const puntos: number = obtenerPuntosCarta(valorRealCarta);
+  sumarPuntuacion(puntos);
+  muestraPuntuacion();
   revisarPartida();
 };
 
 const queHubieraPasado = (): void => {
-  calcularCartaYPuntuacion();
+  const valorAleatorio: number = obtenerValorAleatorio();
+  const valorRealCarta: number = calcularCarta(valorAleatorio);
+  pintarCarta(valorRealCarta);
+  const puntos: number = obtenerPuntosCarta(valorRealCarta);
+  sumarPuntuacion(puntos);
+  muestraPuntuacion();
   showMessage("Esta puntuación habrias sacado si hubieras seguido jugando");
   botonReset();
+  buttonWhatWouldHappen(true);
 };
 
-function calcularCartaYPuntuacion() {
-  const carta: number = dameCarta();
-  sumarPuntuacion(carta);
-  muestraPuntuacion(score);
+function calcularCarta(valorRealCarta: number): number {
+  return valorRealCarta > 7 ? valorRealCarta + 2 : valorRealCarta;
 }
 
 function sumarPuntuacion(carta: number): void {
@@ -120,12 +120,21 @@ function sumarPuntuacion(carta: number): void {
 }
 
 const revisarPartida = (): void => {
-  if (score > 7.5 || score === 7.5) {
-    finalPartidas();
+  if (score === 7.5) {
+    ganarPartida();
+  }
+  if (score > 7.5) {
+    perderPartida();
   }
 };
 
-function finalPartidas() {
+function ganarPartida() {
+  const mensajeAMostrar: string = seleccionMensaje();
+  showMessage(mensajeAMostrar);
+  botonReset();
+}
+
+function perderPartida() {
   const mensajeAMostrar: string = seleccionMensaje();
   showMessage(mensajeAMostrar);
   botonReset();
@@ -157,6 +166,7 @@ function botonReset(): void {
 }
 
 function showMessage(mensaje: string): void {
+  const message = document.getElementById("message");
   if (
     message !== null &&
     message !== undefined &&
@@ -179,7 +189,7 @@ function seleccionMensaje(): string {
   } else if (score === 7.5) {
     mensaje = "¡Lo has clavado! ¡Enhorabuena!";
   } else {
-    mensaje = "Game Over";
+    mensaje = "Game Over ¡Has perdido!";
   }
   return mensaje;
 }
@@ -234,7 +244,7 @@ function buttonWhatWouldHappen(mostrar: boolean) {
   }
 }
 
-function obtenerValorCarta(carta: number): number {
+function obtenerPuntosCarta(carta: number): number {
   return carta <= 7 ? carta : 0.5;
 }
 
