@@ -36,8 +36,6 @@ if (
   console.error("El elemento con id noMoreCards no es un elemento button");
 }
 
-const newCardShown = document.getElementById("card");
-
 const startAgain = document.getElementById("startAgain");
 if (
   startAgain !== null &&
@@ -73,7 +71,9 @@ const empezarNuevo = (): void => {
 };
 
 const plantarse = (): void => {
-  perderPartida();
+  const mensajeAMostrar: string = seleccionMensaje();
+  showMessage(mensajeAMostrar);
+  botonReset();
   buttonWhatWouldHappen(false);
 };
 
@@ -141,6 +141,7 @@ function perderPartida() {
 }
 
 function pintarCarta(carta: number): void {
+  const newCardShown = document.getElementById("card");
   if (
     newCardShown !== null &&
     newCardShown !== undefined &&
